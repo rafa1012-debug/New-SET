@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  setlists  Setlist[]
+  songs     Song[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Setlist {
+  id        String        @id @default(cuid())
+  name      String
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songs     SetlistSong[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Song {
+  id         String        @id @default(cuid())
+  title      String
+  artist     String?
+  key        String?
+  bpm        Int?
+  pdfPath    String?
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  setlists   SetlistSong[]
+  studyLinks StudyLink[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model SetlistSong {
+  id           String  @id @default(cuid())
+  setlistId    String
+  songId       String
+  order        Int
+  linkedToNext Boolean @default(false)
+  setlist      Setlist @relation(fields: [setlistId], references: [id], onDelete: Cascade)
+  song         Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+}
+
+model StudyLink {
+  id     String  @id @default(cuid())
+  songId String
+  url    String
+  label  String?
+  song   Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+}
